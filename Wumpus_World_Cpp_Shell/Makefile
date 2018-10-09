@@ -16,14 +16,9 @@
 # ======================================================================
 
 RAW_SOURCES = \
-	Agent.hpp\
 	Main.cpp\
 	MyAI.cpp\
-	MyAI.hpp\
-	RandomAI.hpp\
-	ManualAI.hpp\
 	World.cpp\
-	World.hpp
 
 SOURCE_DIR = src
 BIN_DIR = bin
