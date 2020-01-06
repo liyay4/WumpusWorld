@@ -30,7 +30,7 @@ all: $(SOURCES)
 	@rm -rf $(BIN_DIR)
 	@mkdir -p $(BIN_DIR)
 	@mkdir -p $(DOC_DIR)
-	@javac $(SOURCES) -d $(BIN_DIR)
+	@javac -Xlint:unchecked $(SOURCES) -d $(BIN_DIR)
 	@rm -f $(BIN_DIR)/Wumpus_World.jar
 	@jar -cvfe bin/Wumpus_World.jar Main -C $(BIN_DIR) . > /dev/null
 	@rm -f $(BIN_DIR)/*.class
