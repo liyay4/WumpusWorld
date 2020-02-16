@@ -67,9 +67,8 @@ class MyAI ( Agent ):
             return Agent.Action.GRAB
         
         if bump:
-            # bump at the up bound
             if self.orientation == "up":
-                self.x -= 1
+                self.y -= 1
                 # bump at the up right corner
                 if self.x == self.y:
                     return Agent.Action.TURN_LEFT
@@ -84,7 +83,7 @@ class MyAI ( Agent ):
             
             # bump at the right bound
             if self.orientation == "right":
-                self.y -= 1
+                self.x -= 1
                 # bump at the up right corner
                 if self.x == self.y:
                     return Agent.Action.TURN_RIGHT
@@ -99,12 +98,12 @@ class MyAI ( Agent ):
                     
             # bump at the bottom bound
             if self.orientation == "down":
-                self.x += 1
+                self.y += 1
                 # bump at the (1,1)
-                if self.y == 1:
+                if self.x == 1:
                     return Agent.Action.CLIMB
                 # bump at the bottom right corner
-                if self.y > 3:
+                if self.x > 3:
                     return Agent.Action.TURN_RIGHT
                 else:
                     if (self.x, self.y+1) in self.safeNodes:
@@ -114,19 +113,19 @@ class MyAI ( Agent ):
             
             # bump at the left bound
             if self.orientation == "left":
-                self.y += 1
+                self.x += 1
                 # bump at the (1,1)
-                if self.x == 1:
+                if self.y == 1:
                     return Agent.Action.CLIMB
                 # bump at the up left corner
-                if self.x > 3:
+                if self.y > 3:
                     return Agent.Action.TURN_LEFT
                 else:
                     if (self.x+1, self.y) in self.safeNodes:
                         return Agent.Action.TURN_RIGHT
                     else:
                         return Agent.Action.TURN_LEFT
-       
+            
         else:
             self.tell(self.x-1, self.y-1, stench, breeze, glitter)
             self.mark_visited(self.x-1, self.y-1)
