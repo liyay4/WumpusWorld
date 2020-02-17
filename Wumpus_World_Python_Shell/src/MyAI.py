@@ -307,7 +307,7 @@ class MyAI ( Agent ):
                         return updated_path
             return None
         def __str__(self):
-            return f'Graph: {dict(self._graph)}'
+            return 'Graph: {}'.format(dict(self._graph))
             
             
     # ======================================================================
