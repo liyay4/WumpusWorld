@@ -162,16 +162,16 @@ class MyAI ( Agent ):
                 pit = True
                 if self.worldKnowledge[y][x-1]:
                     if not self.worldKnowledge[y][x-1].breeze:
-                        wumpus = False
+                        pit = False
                 elif self.worldKnowledge[y][x+1]:
                     if not self.worldKnowledge[y][x+1].breeze:
-                        wumpus = False
+                        pit = False
                 elif self.worldKnowledge[y-1][x]:
                     if not self.worldKnowledge[y-1][x].breeze:
-                        wumpus = False
+                        pit = False
                 elif self.worldKnowledge[y+1][x]:
                     if not self.worldKnowledge[y+1][x].breeze:
-                        wumpus = False
+                        pit = False
             self.worldKnowledge[y][x].infer(wumpus, pit)
             if self.worldKnowledge[y][x].safe:
                 self.safeNodes.add((x+1, y+1))
