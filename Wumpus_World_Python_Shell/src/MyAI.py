@@ -2,7 +2,6 @@
 # FILE:        MyAI.py
 #
 # AUTHOR:      Abdullah Younis
-#              Alexander Mulligan
 #
 # DESCRIPTION: This file contains your agent class, which you will
 #              implement. You are responsible for implementing the
@@ -28,6 +27,7 @@ class MyAI ( Agent ):
         # ======================================================================
         # YOUR CODE BEGINS
         # ======================================================================
+        
         self.x = 1
         self.y = 1
         self.visitedNodes = set() #keeps track of visited nodes
@@ -43,6 +43,7 @@ class MyAI ( Agent ):
         self.worldKnowledge = [[None for x in range(7)] for y in range(7)]
         self.actionQueue = Queue() #for multi-step actions
         self.parents = defaultdict(tuple)
+        
         # ======================================================================
         # YOUR CODE ENDS
         # ======================================================================
@@ -51,6 +52,8 @@ class MyAI ( Agent ):
         # ======================================================================
         # YOUR CODE BEGINS
         # ======================================================================
+
+
         prev_pos = self.x, self.y
         self.update_orient(self.lastAction)
         self.update_pos(self.lastAction)
@@ -65,83 +68,21 @@ class MyAI ( Agent ):
             self.hasGold = True
             self.lastAction = Agent.Action.GRAB
             return Agent.Action.GRAB
-        
         if bump:
-            if self.orientation == "up":
-                self.y -= 1
-                # bump at the up right corner
-                if self.x == self.y:
-                    self.lastAction = Agent.Action.TURN_LEFT
-                    return Agent.Action.TURN_LEFT
-                # bump at the up left corner
-                if self.x == 1:
-                    self.lastAction = Agent.Action.TURN_RIGHT
-                    return Agent.Action.TURN_RIGHT
-                else:
-                    if (self.x+1, self.y) in self.safeNodes:
-                        self.lastAction = Agent.Action.TURN_RIGHT
-                        return Agent.Action.TURN_RIGHT
-                    else:
-                        self.lastAction = Agent.Action.TURN_LEFT
-                        return Agent.Action.TURN_LEFT
-            
-            # bump at the right bound
-            if self.orientation == "right":
-                self.x -= 1
-                # bump at the up right corner
-                if self.x == self.y:
-                    self.lastAction = Agent.Action.TURN_RIGHT
-                    return Agent.Action.TURN_RIGHT
-                # bump at the bottom right corner
-                if self.y == 1:
-                    self.lastAction = Agent.Action.TURN_LEFT
-                    return Agent.Action.TURN_LEFT
-                else:
-                    if (self.x, self.y+1) in self.safeNodes:
-                        self.lastAction = Agent.Action.TURN_LEFT
-                        return Agent.Action.TURN_LEFT
-                    else:
-                        self.lastAction = Agent.Action.TURN_RIGHT
-                        return Agent.Action.TURN_RIGHT
-                    
-            # bump at the bottom bound
-            if self.orientation == "down":
-                self.y += 1
-                # bump at the (1,1)
-                if self.x == 1:
-                    return Agent.Action.CLIMB
-                # bump at the bottom right corner
-                if self.x > 3:
-                    self.lastAction = Agent.Action.TURN_RIGHT
-                    return Agent.Action.TURN_RIGHT
-                else:
-                    if (self.x, self.y+1) in self.safeNodes:
-                        self.lastAction = Agent.Action.TURN_LEFT
-                        return Agent.Action.TURN_LEFT
-                    else:
-                        self.lastAction = Agent.Action.TURN_RIGHT
-                        return Agent.Action.TURN_RIGHT
-            
-            # bump at the left bound
-            if self.orientation == "left":
-                self.x += 1
-                # bump at the (1,1)
-                if self.y == 1:
-                    return Agent.Action.CLIMB
-                # bump at the up left corner
-                if self.y > 3:
-                    self.lastAction = Agent.Action.TURN_LEFT
-                    return Agent.Action.TURN_LEFT
-                else:
-                    if (self.x+1, self.y) in self.safeNodes:
-                        self.lastAction = Agent.Action.TURN_RIGHT
-                        return Agent.Action.TURN_RIGHT
-                    else:
-                        self.lastAction = Agent.Action.TURN_LEFT
-                        return Agent.Action.TURN_LEFT
-       
+            self.bump_move()
+            if self.x > boundaryX:
+                boundaryX = self.x
+            if self.y > boundaryY:
+                boundaryY = self.y
+            return self.lastAction
+        
         else:
-            self.tell(self.x-1, self.y-1, stench, breeze, glitter)
+            if scream:
+                for x in range(7):
+                    for y in range(7):
+                        self.worldKnowledge[y][x].wumpus = False
+            
+            self.tell(self.x-1, self.y-1, stench, breeze, glitter) # kernel
             self.mark_visited(self.x-1, self.y-1)
             if (self.x, self.y) not in self.visitedNodes:
                 self.DLS()
@@ -157,9 +98,9 @@ class MyAI ( Agent ):
             act = self.actionQueue.get_nowait()
             self.lastAction = act
             return act
-            
         self.lastAction = Agent.Action.CLIMB
         return Agent.Action.CLIMB
+
         # ======================================================================
         # YOUR CODE ENDS
         # ======================================================================
@@ -167,6 +108,7 @@ class MyAI ( Agent ):
     # ======================================================================
     # YOUR CODE BEGINS
     # ======================================================================
+    # good to go
     def update_pos(self, action):
         if action == Agent.Action.FORWARD:
             if self.orientation == 'up':
@@ -177,7 +119,8 @@ class MyAI ( Agent ):
                 self.x += 1
             if self.orientation == 'left':
                 self.x -= 1
-    
+
+    # good to go
     def update_orient(self, action):
         o = ['up', 'right', 'down', 'left']
         n = o.index(self.orientation)
@@ -189,7 +132,8 @@ class MyAI ( Agent ):
             else:
                 c = n+1
             self.orientation = o[c]
-    
+
+    # may change name to Itertive Deepening Search(IDS)
     def DLS(self):
         c = [(self.x+1,self.y), (self.x, self.y+1), (self.x-1, self.y), (self.x, self.y-1)]
         for x,y in c:
@@ -201,7 +145,7 @@ class MyAI ( Agent ):
             if t not in self.visitedNodes and t in self.safeNodes:
                 return t
         return self.parents[(self.x, self.y)]
-    
+
     def tell(self, x, y, stench, breeze, glitter):
         if self.boundaryX > x >= 0 and self.boundaryY > y >= 0:
             if not self.worldKnowledge[y][x]:
@@ -215,8 +159,12 @@ class MyAI ( Agent ):
                 self.worldKnowledge[y][x] = self.Node()
             if self.worldKnowledge[y][x].visited:
                 return
+
             wumpus = False
-            pit =  False
+            pit = False
+
+            # If wumpus is False then it is sure there is no wumpus
+            # It wumpus is True, it has a wumpus for sure.
             if stench:
                 wumpus = True
                 if self.worldKnowledge[y][x-1]:
@@ -231,27 +179,37 @@ class MyAI ( Agent ):
                 elif self.worldKnowledge[y+1][x]:
                     if not self.worldKnowledge[y+1][x].stench:
                         wumpus = False
+
+            # If pit is False then it is sure there is no pit
+            # but pit is True, it does not mean it has a pit for sure.
             if breeze:
                 pit = True
                 if self.worldKnowledge[y][x-1]:
                     if not self.worldKnowledge[y][x-1].breeze:
-                        wumpus = False
+                        pit = False
                 elif self.worldKnowledge[y][x+1]:
                     if not self.worldKnowledge[y][x+1].breeze:
-                        wumpus = False
+                        pit = False
                 elif self.worldKnowledge[y-1][x]:
                     if not self.worldKnowledge[y-1][x].breeze:
-                        wumpus = False
+                        pit = False
                 elif self.worldKnowledge[y+1][x]:
                     if not self.worldKnowledge[y+1][x].breeze:
-                        wumpus = False
+                        pit = False
+
+            if not self.worldKnowledge[y][x].wumpus:
+                wumpus = False
+            if not self.worldKnowledge[y][x].pit:
+                pit = False
+
             self.worldKnowledge[y][x].infer(wumpus, pit)
+            
             if self.worldKnowledge[y][x].safe:
                 self.safeNodes.add((x+1, y+1))
             else:
                 if (x+1,y+1) in self.safeNodes:
                     self.safeNodes.remove((x+1, y+1))
-        
+                    
     def propagate_knowledge(self, x, y):
         i = self.worldKnowledge[y][x]
         self.update_tile(x, y-1, i.stench, i.breeze)
@@ -268,7 +226,7 @@ class MyAI ( Agent ):
         
     def ask(self, x, y):
         return self.worldKnowledge[y][x].safe
-    
+
     def back(self):
         if self.nodeHistory:
             b = self.nodeHistory.get_nowait()
@@ -291,7 +249,7 @@ class MyAI ( Agent ):
             elif x < self.x:
                 self.orient('left')
                 self.actionQueue.put_nowait(Agent.Action.FORWARD)
-        
+
     def orient(self, direction):
         if not self.orientation == direction:
             if direction == 'up':
@@ -326,7 +284,58 @@ class MyAI ( Agent ):
                 else:
                     self.actionQueue.put_nowait(Agent.Action.TURN_LEFT)
                     self.actionQueue.put_nowait(Agent.Action.TURN_LEFT)
+
+    def bump_move(self):
+        # bump at the up bound
+        if self.orientation == "up":
+                self.y -= 1
+                # bump at the up left corner
+                if self.x == 1:
+                    self.lastAction = Agent.Action.TURN_RIGHT
+                else:
+                    if (self.x-1, self.y) in self.safeNodes:
+                        self.lastAction = Agent.Action.TURN_LEFT
+                    else:
+                        self.lastAction = Agent.Action.TURN_RIGHT
             
+        # bump at the right bound
+        elif self.orientation == "right":
+                self.x -= 1
+                # bump at the bottom right corner
+                if self.y == 1:
+                    self.lastAction = Agent.Action.TURN_LEFT
+                else:
+                    if (self.x, self.y-1) in self.safeNodes:
+                        self.lastAction = Agent.Action.TURN_RIGHT
+                    else:
+                        self.lastAction = Agent.Action.TURN_LEFT
+                    
+        # bump at the bottom bound
+        elif self.orientation == "down":
+                self.y += 1
+                # bump at the (1,1)
+                if self.x == 1:
+                    self.lastAction = Agent.Action.CLIMB
+                else:
+                    if (self.x-1, self.y) in self.safeNodes:
+                        self.lastAction = Agent.Action.TURN_RIGHT
+                    else:
+                        self.lastAction = Agent.Action.TURN_LEFT
+            
+        # bump at the left bound
+        elif self.orientation == "left":
+                self.x += 1
+                # bump at the (1,1)
+                if self.y == 1:
+                    self.lastAction = Agent.Action.CLIMB
+                else:
+                    if (self.x, self.y-1) in self.safeNodes:
+                        self.lastAction = Agent.Action.TURN_LEFT
+                    else:
+                        self.lastAction = Agent.Action.TURN_RIGHT
+        
+    # good to go
+    # just wondering whether need to add parents
     class Node(object):
         '''Node object storing all the information about a node'''
         def __init__(self):
@@ -334,10 +343,9 @@ class MyAI ( Agent ):
             self.breeze = True
             self.glitter = False
             self.visited = False
-            self.safe = True
-            self.wumpus = False
-            self.pit = False
-            
+            self.safe = False
+            self.wumpus = True
+            self.pit = True
         def __bool__(self):
             return self.safe
                 
@@ -354,7 +362,8 @@ class MyAI ( Agent ):
                     
         def visit(self):
             self.visited = True
-    
+
+
     class Graph(object):
         '''Simple directed graph object'''
         def __init__(self):
@@ -381,9 +390,8 @@ class MyAI ( Agent ):
             return None
         def __str__(self):
             return f'Graph: {dict(self._graph)}'
-            
-            
+
+    
     # ======================================================================
     # YOUR CODE ENDS
     # ======================================================================
-    
