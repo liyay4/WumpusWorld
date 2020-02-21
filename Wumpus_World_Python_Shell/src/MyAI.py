@@ -66,7 +66,12 @@ class MyAI ( Agent ):
             self.lastAction = Agent.Action.GRAB
             return Agent.Action.GRAB
         if bump:
-            pass
+            self.bump_move()
+            if self.x > boundaryX:
+                boundaryX = self.x
+            if self.y > boundaryY:
+                boundaryY = self.y
+            return self.lastAction
         else:
             self.tell(self.x-1, self.y-1, stench, breeze, glitter)
             self.mark_visited(self.x-1, self.y-1)
@@ -254,6 +259,55 @@ class MyAI ( Agent ):
                     self.actionQueue.put_nowait(Agent.Action.TURN_LEFT)
                     self.actionQueue.put_nowait(Agent.Action.TURN_LEFT)
             
+    def bump_move(self):
+        # bump at the up bound
+        if self.orientation == "up":
+                self.y -= 1
+                # bump at the up left corner
+                if self.x == 1:
+                    self.lastAction = Agent.Action.TURN_RIGHT
+                else:
+                    if (self.x-1, self.y) in self.safeNodes:
+                        self.lastAction = Agent.Action.TURN_LEFT
+                    else:
+                        self.lastAction = Agent.Action.TURN_RIGHT
+            
+        # bump at the right bound
+        elif self.orientation == "right":
+                self.x -= 1
+                # bump at the bottom right corner
+                if self.y == 1:
+                    self.lastAction = Agent.Action.TURN_LEFT
+                else:
+                    if (self.x, self.y-1) in self.safeNodes:
+                        self.lastAction = Agent.Action.TURN_RIGHT
+                    else:
+                        self.lastAction = Agent.Action.TURN_LEFT
+                    
+        # bump at the bottom bound
+        elif self.orientation == "down":
+                self.y += 1
+                # bump at the (1,1)
+                if self.x == 1:
+                    self.lastAction = Agent.Action.CLIMB
+                else:
+                    if (self.x-1, self.y) in self.safeNodes:
+                        self.lastAction = Agent.Action.TURN_RIGHT
+                    else:
+                        self.lastAction = Agent.Action.TURN_LEFT
+            
+        # bump at the left bound
+        elif self.orientation == "left":
+                self.x += 1
+                # bump at the (1,1)
+                if self.y == 1:
+                    self.lastAction = Agent.Action.CLIMB
+                else:
+                    if (self.x, self.y-1) in self.safeNodes:
+                        self.lastAction = Agent.Action.TURN_LEFT
+                    else:
+                        self.lastAction = Agent.Action.TURN_RIGHT
+    
     class Node(object):
         '''Node object storing all the information about a node'''
         def __init__(self):
