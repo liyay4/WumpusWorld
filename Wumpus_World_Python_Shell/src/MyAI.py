@@ -68,6 +68,11 @@ class MyAI ( Agent ):
         if bump:
             pass
         else:
+            if scream:
+                for x in range(7):
+                    for y in range(7):
+                        self.worldKnowledge[y][x].wumpus = False
+            
             self.tell(self.x-1, self.y-1, stench, breeze, glitter)
             self.mark_visited(self.x-1, self.y-1)
             if (self.x, self.y) not in self.visitedNodes:
