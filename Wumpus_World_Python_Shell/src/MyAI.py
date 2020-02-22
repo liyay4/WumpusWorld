@@ -144,6 +144,11 @@ class MyAI ( Agent ):
                 return
             wumpus = False
             pit =  False
+            
+            # If wumpus is False then it is sure there is no wumpus
+            # but wumpus is True, it does not mean it has a wumpus for sure e.g. if no square of it has discovered.
+            # it all of the neighbors (actually, two of the neighbors are enough) have been discovred, 
+            # then if wumpus is True, it has a wumpus for sure.
             if stench:
                 wumpus = True
                 if self.worldKnowledge[y][x-1]:
@@ -158,6 +163,9 @@ class MyAI ( Agent ):
                 elif self.worldKnowledge[y+1][x]:
                     if not self.worldKnowledge[y+1][x].stench:
                         wumpus = False
+            
+            # If pit is False then it is sure there is no pit
+            # but pit is True, it does not mean it has a pit for sure.
             if breeze:
                 pit = True
                 if self.worldKnowledge[y][x-1]:
@@ -172,6 +180,12 @@ class MyAI ( Agent ):
                 elif self.worldKnowledge[y+1][x]:
                     if not self.worldKnowledge[y+1][x].breeze:
                         pit = False
+            
+            if not self.worldKnowledge[y][x].wumpus:
+                wumpus = False
+            if not self.worldKnowledge[y][x].pit:
+                pit = False
+            
             self.worldKnowledge[y][x].infer(wumpus, pit)
             if self.worldKnowledge[y][x].safe:
                 self.safeNodes.add((x+1, y+1))
@@ -261,9 +275,9 @@ class MyAI ( Agent ):
             self.breeze = True
             self.glitter = False
             self.visited = False
-            self.safe = True
-            self.wumpus = False
-            self.pit = False
+            self.safe = False
+            self.wumpus = True
+            self.pit = True
             
         def __bool__(self):
             return self.safe
