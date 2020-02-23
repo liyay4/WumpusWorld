@@ -54,6 +54,31 @@ class MyAI ( Agent ):
         prev_pos = self.x, self.y
         self.update_orient(self.lastAction)
         self.update_pos(self.lastAction)
+        
+        # handle the conner case at (1,1) if breeze or stench.
+        if self.x == 1 and self.y == 1:
+            if self.lastAction == Agent.Action.CLIMB:
+                if breeze:
+                    self.lastAction = Agent.Action.CLIMB
+                    return Agent.Action.CLIMB
+                if stench:
+                    self.lastAction = Agent.Action.SHOOT
+                    return Agent.Action.SHOOT
+            if self.lastAction == Agent.Action.SHOOT:
+                self.hasArrow = False
+                for x in range(7):
+                    for y in range(7):
+                        if not self.worldKnowledge[y][x]:
+                            self.worldKnowledge[y][x] = self.Node()
+                        self.worldKnowledge[y][x].wumpus = False
+                if not scream:
+                    self.worldKnowledge[self.y-1][self.x].wumpus = True
+                    self.lastAction = Agent.Action.TURN_LEFT
+                    return Agent.Action.TURN_LEFT
+                if scream:
+                    self.lastAction = Agent.Action.FORWARD
+                    return Agent.Action.FORWARD
+        
         if not (self.x, self.y) == prev_pos and not self.parents[prev_pos] == (self.x, self.y):
             self.parents[(self.x, self.y)] = prev_pos
         #print(f'pos: {self.x}, {self.y}')
